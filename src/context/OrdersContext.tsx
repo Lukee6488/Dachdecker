@@ -113,6 +113,7 @@ export function OrdersProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     fetchOrders();
+    fetchLogs();
 
     const channel = supabase
       .channel("orders-realtime")
