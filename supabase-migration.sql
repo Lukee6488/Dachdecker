@@ -129,3 +129,16 @@ END;
 $$;
 
 GRANT EXECUTE ON FUNCTION public.setup_test_accounts() TO anon, authenticated;
+
+-- 7. Order logs table
+CREATE TABLE IF NOT EXISTS public.order_logs (
+  id         UUID        DEFAULT gen_random_uuid() PRIMARY KEY,
+  order_id   TEXT        NOT NULL,
+  action     TEXT        NOT NULL,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+ALTER TABLE public.order_logs ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "logs_authenticated" ON public.order_logs;
+CREATE POLICY "logs_authenticated" ON public.order_logs FOR ALL TO authenticated USING (true) WITH CHECK (true);
