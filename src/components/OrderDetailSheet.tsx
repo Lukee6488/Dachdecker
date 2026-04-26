@@ -101,6 +101,7 @@ export function OrderDetailSheet({
       .from("profiles")
       .select("id, display_name")
       .eq("role", "project_manager")
+      .neq("display_name", "Projektleiter 2")
       .then(({ data }) => { if (data) setPmProfiles(data as PMProfile[]); });
   }, [profile?.role]);
 
