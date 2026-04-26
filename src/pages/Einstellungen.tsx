@@ -631,10 +631,10 @@ const Einstellungen = () => {
                   </div>
                   <p className="text-xs text-muted-foreground">Diese Aktionen können nicht rückgängig gemacht werden.</p>
                   <div className="flex gap-2">
-                    <Button variant="outline" size="sm" className="text-xs h-7 text-destructive border-destructive/25 hover:bg-destructive/10">
+                    <Button variant="outline" size="sm" className="text-xs h-7 text-destructive border-destructive/25 hover:bg-destructive/10" onClick={() => setConfirmDeleteOrders(true)}>
                       Alle Aufträge löschen
                     </Button>
-                    <Button variant="outline" size="sm" className="text-xs h-7 text-destructive border-destructive/25 hover:bg-destructive/10">
+                    <Button variant="outline" size="sm" className="text-xs h-7 text-destructive border-destructive/25 hover:bg-destructive/10" onClick={() => setConfirmResetAccount(true)}>
                       Account zurücksetzen
                     </Button>
                   </div>
