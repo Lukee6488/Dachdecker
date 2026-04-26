@@ -166,6 +166,10 @@ const Einstellungen = () => {
   const [twoFactorEnabled, setTwoFactorEnabled] = usePersisted("settings.twoFactorEnabled", false);
   const [sessionTimeout, setSessionTimeout] = usePersisted("settings.sessionTimeout", "30");
   const [autoLogout, setAutoLogout] = usePersisted("settings.autoLogout", true);
+  const [schedule, setSchedule] = usePersisted<DaySchedule[]>("settings.schedule", DEFAULT_SCHEDULE);
+
+  const updateDay = (i: number, patch: Partial<DaySchedule>) =>
+    setSchedule(schedule.map((d, idx) => idx === i ? { ...d, ...patch } : d));
 
   const handleSave = (section: string) => toast.success(`${section} gespeichert`, { description: "Einstellungen werden beim nächsten Start geladen." });
 
