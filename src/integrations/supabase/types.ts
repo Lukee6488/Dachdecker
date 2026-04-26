@@ -59,6 +59,27 @@ export type Database = {
         }
         Relationships: []
       }
+      order_logs: {
+        Row: {
+          id: string
+          order_id: string
+          action: string
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          order_id: string
+          action: string
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          order_id?: string
+          action?: string
+          created_at?: string
+        }
+        Relationships: []
+      }
       orders: {
         Row: {
           addresse: string
