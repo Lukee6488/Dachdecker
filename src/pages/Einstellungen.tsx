@@ -292,15 +292,15 @@ const Einstellungen = () => {
                 <CardDescription className="text-xs">Reguläre Arbeitszeiten</CardDescription>
               </CardHeader>
               <CardContent className="space-y-3">
-                {["Montag", "Dienstag", "Mittwoch", "Donnerstag", "Freitag", "Samstag", "Sonntag"].map((day, i) => (
+                {DAYS.map((day, i) => (
                   <div key={day} className="flex items-center justify-between gap-3">
                     <span className="text-sm w-24 shrink-0">{day}</span>
                     <div className="flex items-center gap-2 flex-1">
-                      <Input type="time" defaultValue={i < 5 ? "07:00" : "08:00"} className="h-7 text-xs w-24" />
+                      <Input type="time" value={schedule[i]?.start ?? "07:00"} onChange={(e) => updateDay(i, { start: e.target.value })} className="h-7 text-xs w-24" />
                       <span className="text-muted-foreground text-xs">–</span>
-                      <Input type="time" defaultValue={i < 5 ? "17:00" : "12:00"} className="h-7 text-xs w-24" />
+                      <Input type="time" value={schedule[i]?.end ?? "17:00"} onChange={(e) => updateDay(i, { end: e.target.value })} className="h-7 text-xs w-24" />
                     </div>
-                    <Switch defaultChecked={i < 6} />
+                    <Switch checked={schedule[i]?.enabled ?? true} onCheckedChange={(v) => updateDay(i, { enabled: v })} />
                   </div>
                 ))}
                 <div className="flex justify-end pt-2">
