@@ -71,6 +71,48 @@ const Einstellungen = () => {
     URL.revokeObjectURL(url);
     toast.success("JSON exportiert");
   };
+  // Password change state
+  const [oldPw, setOldPw]         = useState("");
+  const [newPw, setNewPw]         = useState("");
+  const [confirmPw, setConfirmPw] = useState("");
+  const [changingPw, setChangingPw] = useState(false);
+
+  // Danger zone confirmations
+  const [confirmDeleteOrders, setConfirmDeleteOrders]   = useState(false);
+  const [confirmResetAccount, setConfirmResetAccount]   = useState(false);
+
+  const handleChangePassword = async () => {
+    if (!oldPw || !newPw || !confirmPw) { toast.error("Alle Felder ausfüllen"); return; }
+    if (newPw !== confirmPw) { toast.error("Passwörter stimmen nicht überein"); return; }
+    if (newPw.length < 6) { toast.error("Passwort muss mindestens 6 Zeichen haben"); return; }
+    setChangingPw(true);
+    const { error: verifyError } = await supabase.auth.signInWithPassword({
+      email: user?.email ?? "", password: oldPw,
+    });
+    if (verifyError) {
+      toast.error("Aktuelles Passwort ist falsch");
+      setChangingPw(false);
+      return;
+    }
+    const { error } = await supabase.auth.updateUser({ password: newPw });
+    setChangingPw(false);
+    if (error) { toast.error("Passwort konnte nicht geändert werden"); return; }
+    toast.success("Passwort geändert");
+    setOldPw(""); setNewPw(""); setConfirmPw("");
+  };
+
+  const handleDeleteAllOrders = async () => {
+    const { error } = await supabase.from("orders").delete().lte("received_at", new Date().toISOString());
+    if (error) { toast.error("Fehler beim Löschen"); return; }
+    toast.success("Alle Aufträge gelöscht");
+    setConfirmDeleteOrders(false);
+  };
+
+  const handleResetAccount = () => {
+    Object.keys(localStorage).filter((k) => k.startsWith("settings.")).forEach((k) => localStorage.removeItem(k));
+    signOut();
+  };
+
   function usePersisted<T>(key: string, initial: T): [T, (v: T) => void] {
     const [value, setValue] = useState<T>(() => {
       try { const s = localStorage.getItem(key); return s !== null ? JSON.parse(s) : initial; } catch { return initial; }
