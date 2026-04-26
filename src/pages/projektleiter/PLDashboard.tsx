@@ -7,7 +7,6 @@ import { useAuth } from "@/context/AuthContext";
 
 export default function PLDashboard() {
   const { orders, updateStatus, updateOrder } = useOrders();
-  const { employees } = useEmployees();
   const { user, profile } = useAuth();
 
   const myOrders = useMemo(
