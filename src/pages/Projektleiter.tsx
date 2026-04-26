@@ -89,7 +89,8 @@ export default function Projektleiter() {
     const { data } = await supabase
       .from("profiles")
       .select("id, display_name, categories")
-      .eq("role", "project_manager");
+      .eq("role", "project_manager")
+      .neq("display_name", "Projektleiter 2");
     setPms((data ?? []) as PMProfile[]);
     setLoadingPMs(false);
   };
