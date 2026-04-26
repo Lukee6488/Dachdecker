@@ -37,8 +37,17 @@ import { useOrders } from "@/context/OrdersContext";
 import { useAuth } from "@/context/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 
+type DaySchedule = { start: string; end: string; enabled: boolean };
+const DAYS = ["Montag", "Dienstag", "Mittwoch", "Donnerstag", "Freitag", "Samstag", "Sonntag"];
+const DEFAULT_SCHEDULE: DaySchedule[] = DAYS.map((_, i) => ({
+  start: i < 5 ? "07:00" : "08:00",
+  end:   i < 5 ? "17:00" : "12:00",
+  enabled: i < 6,
+}));
+
 const Einstellungen = () => {
   const { orders } = useOrders();
+  const { user, signOut } = useAuth();
 
   const handleExportCSV = () => {
     const headers = ["ID", "Kunde", "Adresse", "Telefon", "Kategorie", "Priorität", "Status", "Eingang", "Termin", "Zugewiesen an", "Beschreibung", "Notizen"];
