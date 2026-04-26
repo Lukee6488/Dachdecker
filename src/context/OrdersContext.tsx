@@ -36,11 +36,29 @@ export function OrdersProvider({ children }: { children: ReactNode }) {
   const [logs, setLogs] = useState<Record<string, OrderLog[]>>({});
 
   const addLog = (orderId: string, action: string) => {
+    const time = new Date().toISOString();
     setLogs((prev) => ({
       ...prev,
-      [orderId]: [...(prev[orderId] || []), { time: new Date().toISOString(), action }],
+      [orderId]: [...(prev[orderId] || []), { time, action }],
     }));
+    supabase.from("order_logs")
+      .insert({ order_id: orderId, action, created_at: time })
+      .then(({ error }) => { if (error) console.error("Log save error:", error); });
   };
+
+  const fetchLogs = useCallback(async () => {
+    const { data, error } = await supabase
+      .from("order_logs")
+      .select("order_id, action, created_at")
+      .order("created_at", { ascending: true });
+    if (error) { console.error("Error fetching logs:", error); return; }
+    const map: Record<string, OrderLog[]> = {};
+    for (const row of (data ?? [])) {
+      if (!map[row.order_id]) map[row.order_id] = [];
+      map[row.order_id].push({ time: row.created_at, action: row.action });
+    }
+    setLogs(map);
+  }, []);
 
   const fetchOrders = useCallback(async () => {
     const { data, error } = await supabase
