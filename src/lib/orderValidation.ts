@@ -16,14 +16,7 @@ export function validateOrder(order: Order): OrderValidation {
   if (!order.scheduledAt) {
     missing.push("Termin & Uhrzeit");
   } else {
-    try {
-      const d = parseISO(order.scheduledAt);
-      if (d.getHours() === 0 && d.getMinutes() === 0 && d.getSeconds() === 0) {
-        missing.push("Uhrzeit");
-      }
-    } catch {
-      missing.push("Termin (ungültig)");
-    }
+    try { parseISO(order.scheduledAt); } catch { missing.push("Termin (ungültig)"); }
   }
 
   return { valid: missing.length === 0, missing };
