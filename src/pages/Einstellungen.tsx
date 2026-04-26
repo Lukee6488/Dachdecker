@@ -515,12 +515,12 @@ const Einstellungen = () => {
                     <Lock className="h-3 w-3 text-muted-foreground" />Passwort ändern
                   </Label>
                   <div className="grid grid-cols-2 gap-2">
-                    <Input type="password" placeholder="Aktuelles Passwort" className="h-8 text-sm" />
-                    <Input type="password" placeholder="Neues Passwort" className="h-8 text-sm" />
+                    <Input type="password" placeholder="Aktuelles Passwort" value={oldPw} onChange={(e) => setOldPw(e.target.value)} className="h-8 text-sm" />
+                    <Input type="password" placeholder="Neues Passwort" value={newPw} onChange={(e) => setNewPw(e.target.value)} className="h-8 text-sm" />
                   </div>
-                  <Input type="password" placeholder="Passwort bestätigen" className="h-8 text-sm max-w-[50%]" />
-                  <Button variant="outline" size="sm" className="gap-1.5 h-7 text-xs mt-1">
-                    <Lock className="h-3 w-3" />Passwort ändern
+                  <Input type="password" placeholder="Passwort bestätigen" value={confirmPw} onChange={(e) => setConfirmPw(e.target.value)} className="h-8 text-sm max-w-[50%]" />
+                  <Button variant="outline" size="sm" className="gap-1.5 h-7 text-xs mt-1" onClick={handleChangePassword} disabled={changingPw}>
+                    <Lock className="h-3 w-3" />{changingPw ? "Wird geändert…" : "Passwort ändern"}
                   </Button>
                 </div>
 
