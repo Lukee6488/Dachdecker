@@ -10,8 +10,8 @@ import { Separator } from "@/components/ui/separator";
 import type { UserRole } from "@/context/AuthContext";
 
 const TEST_ACCOUNTS = {
-  secretary:       { username: "Sekretaerin@test.de",   password: "Test123" },
-  project_manager: { username: "Projektleiter@test.de", password: "Test123" },
+  secretary:       { username: "sekretaerin@test.de",   password: "Test123" },
+  project_manager: { username: "projektleiter@test.de", password: "Test123" },
 };
 
 function roleToPath(role?: UserRole) {
@@ -61,7 +61,7 @@ export default function Login() {
     const acc = TEST_ACCOUNTS[type];
     setUsername(acc.username);
     setPassword(acc.password);
-    doLogin(acc.username, acc.password);
+    setError(null);
   };
 
   return (
@@ -189,7 +189,7 @@ export default function Login() {
               <span className="text-[11px] text-slate-600 uppercase tracking-wider shrink-0">Test-Accounts</span>
               <Separator className="flex-1 bg-[hsl(222_20%_20%)]" />
             </div>
-            <div className="grid grid-cols-1 gap-2">
+            <div className="grid grid-cols-2 gap-2">
               <Button
                 type="button"
                 variant="outline"
