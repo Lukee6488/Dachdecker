@@ -17,6 +17,16 @@ import {
 } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import {
   Building2, Bell, Palette, Shield, Database, Info,
   Save, Upload, Trash2, Download, Mail, Phone,
   MapPin, Globe, Clock, Sun, Moon, Monitor,
@@ -24,6 +34,8 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { useOrders } from "@/context/OrdersContext";
+import { useAuth } from "@/context/AuthContext";
+import { supabase } from "@/integrations/supabase/client";
 
 const Einstellungen = () => {
   const { orders } = useOrders();
