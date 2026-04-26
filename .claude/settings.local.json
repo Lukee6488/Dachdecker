@@ -1,0 +1,19 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm uninstall:*)",
+      "Bash(npm run:*)",
+      "Bash(npm install:*)",
+      "Bash(node -e \"console.log\\(Object.keys\\(require\\('C:/Users/lukas/Desktop/Arbeit/Elektriker_Dashboard/node_modules/@dnd-kit/modifiers/dist/modifiers.cjs.js'\\)\\)\\)\")",
+      "Bash(npx tsc:*)",
+      "mcp__claude_ai_Goodnotes__create_markdown_text_document",
+      "Bash(npx vite:*)",
+      "Bash(npx supabase:*)",
+      "Bash(gh pr:*)",
+      "Bash(gh --version)",
+      "Bash(git init *)",
+      "Bash(git add *)",
+      "Bash(gh auth *)"
+    ]
+  }
+}
