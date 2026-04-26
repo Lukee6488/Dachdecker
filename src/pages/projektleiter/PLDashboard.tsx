@@ -57,7 +57,6 @@ export default function PLDashboard() {
               orders={myOrders}
               onStatusChange={updateStatus}
               onUpdate={updateOrder}
-              employees={employees}
               hiddenColumns={["pm"]}
             />
           )}
