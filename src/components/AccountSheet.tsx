@@ -54,6 +54,10 @@ export function AccountSheet({ open, onOpenChange }: AccountSheetProps) {
   }
 
   async function handleSavePassword() {
+    if (!currentPassword) {
+      toast.error("Bitte aktuelles Passwort eingeben");
+      return;
+    }
     if (!newPassword || newPassword !== confirmPassword) {
       toast.error("Passwörter stimmen nicht überein");
       return;
@@ -63,6 +67,15 @@ export function AccountSheet({ open, onOpenChange }: AccountSheetProps) {
       return;
     }
     setSavingPassword(true);
+    const { error: verifyError } = await supabase.auth.signInWithPassword({
+      email: user?.email ?? "",
+      password: currentPassword,
+    });
+    if (verifyError) {
+      toast.error("Aktuelles Passwort ist falsch");
+      setSavingPassword(false);
+      return;
+    }
     const { error } = await supabase.auth.updateUser({ password: newPassword });
     setSavingPassword(false);
     if (error) { toast.error("Passwort konnte nicht geändert werden"); return; }
