@@ -747,6 +747,41 @@ const Einstellungen = () => {
           </TabsContent>
         </Tabs>
       </div>
+      {/* Alle Aufträge löschen */}
+      <AlertDialog open={confirmDeleteOrders} onOpenChange={setConfirmDeleteOrders}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Alle Aufträge löschen?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Alle {orders.length} Aufträge werden dauerhaft aus der Datenbank gelöscht. Diese Aktion kann nicht rückgängig gemacht werden.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Abbrechen</AlertDialogCancel>
+            <AlertDialogAction className="bg-destructive text-destructive-foreground hover:bg-destructive/90" onClick={handleDeleteAllOrders}>
+              Endgültig löschen
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Account zurücksetzen */}
+      <AlertDialog open={confirmResetAccount} onOpenChange={setConfirmResetAccount}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Account zurücksetzen?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Alle lokalen Einstellungen werden gelöscht und du wirst abgemeldet.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Abbrechen</AlertDialogCancel>
+            <AlertDialogAction className="bg-destructive text-destructive-foreground hover:bg-destructive/90" onClick={handleResetAccount}>
+              Zurücksetzen & abmelden
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </DashboardLayout>
   );
 };
