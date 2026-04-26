@@ -187,13 +187,23 @@ export function AccountSheet({ open, onOpenChange }: AccountSheetProps) {
             {editingPassword ? (
               <div className="space-y-2">
                 <div className="space-y-1.5">
+                  <Label className="text-xs">Aktuelles Passwort</Label>
+                  <Input
+                    type="password"
+                    value={currentPassword}
+                    onChange={(e) => setCurrentPassword(e.target.value)}
+                    className="h-8 text-sm"
+                    autoFocus
+                    placeholder="••••••••"
+                  />
+                </div>
+                <div className="space-y-1.5">
                   <Label className="text-xs">Neues Passwort</Label>
                   <Input
                     type="password"
                     value={newPassword}
                     onChange={(e) => setNewPassword(e.target.value)}
                     className="h-8 text-sm"
-                    autoFocus
                   />
                 </div>
                 <div className="space-y-1.5">
