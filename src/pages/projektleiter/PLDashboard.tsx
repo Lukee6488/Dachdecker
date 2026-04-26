@@ -3,7 +3,6 @@ import { DashboardLayout } from "@/components/DashboardLayout";
 import { KpiCards } from "@/components/KpiCards";
 import { OrdersTable } from "@/components/OrdersTable";
 import { useOrders } from "@/context/OrdersContext";
-import { useEmployees } from "@/context/EmployeesContext";
 import { useAuth } from "@/context/AuthContext";
 
 export default function PLDashboard() {
