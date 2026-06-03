@@ -25,66 +25,70 @@ export default function Login() {
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
+    const SPACING = 19;
+    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     let animId: number;
-    let t = 0;
+    let w = 0, h = 0, t0 = performance.now();
+    let dots: { x: number; y: number }[] = [];
 
     const resize = () => {
-      canvas.width = window.innerWidth;
-      canvas.height = window.innerHeight;
+      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+      w = canvas.clientWidth;
+      h = canvas.clientHeight;
+      canvas.width = Math.round(w * dpr);
+      canvas.height = Math.round(h * dpr);
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      dots = [];
+      const cols = Math.ceil(w / SPACING) + 1;
+      const rows = Math.ceil(h / SPACING) + 1;
+      for (let i = 0; i < cols; i++)
+        for (let j = 0; j < rows; j++)
+          dots.push({ x: i * SPACING, y: j * SPACING });
     };
+
+    canvas.style.width = "100%";
+    canvas.style.height = "100%";
     resize();
     window.addEventListener("resize", resize);
 
-    const SPACING = 22;
-    const zones = [
-      { x: 0.18, y: 0.42, r: 0.32 },
-      { x: 0.72, y: 0.58, r: 0.26 },
-      { x: 0.48, y: 0.18, r: 0.20 },
-    ];
+    const frame = (now: number) => {
+      const t = now - t0;
+      ctx.clearRect(0, 0, w, h);
 
-    const smooth = (x: number) => {
-      const c = Math.max(0, Math.min(1, x));
-      return c * c * c * (c * (c * 6 - 15) + 10);
-    };
+      const cx1 = w * (0.5 + 0.30 * Math.sin(t * 0.000120));
+      const cy1 = h * (0.5 + 0.26 * Math.cos(t * 0.000150));
+      const cx2 = w * (0.5 + 0.32 * Math.cos(t * 0.000090 + 2.0));
+      const cy2 = h * (0.5 + 0.30 * Math.sin(t * 0.000110 + 1.0));
+      const cx3 = w * (0.5 + 0.22 * Math.sin(t * 0.000140 + 4.0));
+      const cy3 = h * (0.5 + 0.24 * Math.cos(t * 0.000080 + 3.0));
+      const sig = Math.min(w, h) * 0.22 || 1;
+      const inv2 = 1 / (2 * sig * sig);
 
-    const draw = () => {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      const cols = Math.ceil(canvas.width / SPACING) + 1;
-      const rows = Math.ceil(canvas.height / SPACING) + 1;
-
-      for (let row = 0; row < rows; row++) {
-        for (let col = 0; col < cols; col++) {
-          const x = col * SPACING;
-          const y = row * SPACING;
-          let glow = 0;
-
-          for (const z of zones) {
-            const cx = z.x + 0.07 * Math.sin(t * 0.38 + z.r * 4.7);
-            const cy = z.y + 0.05 * Math.cos(t * 0.28 + z.r * 3.1);
-            const dx = x / canvas.width - cx;
-            const dy = y / canvas.height - cy;
-            glow += smooth(1 - Math.sqrt(dx * dx + dy * dy) / z.r);
-          }
-
-          const alpha = Math.min(1, 0.055 + glow * 0.30);
-          const radius = 0.55 + glow * 1.5;
-          ctx.beginPath();
-          ctx.arc(x, y, radius, 0, Math.PI * 2);
-          ctx.fillStyle = `rgba(13, 148, 136, ${alpha})`;
-          ctx.fill();
-        }
+      for (const d of dots) {
+        const a1 = d.x - cx1, b1 = d.y - cy1;
+        const a2 = d.x - cx2, b2 = d.y - cy2;
+        const a3 = d.x - cx3, b3 = d.y - cy3;
+        let it = Math.exp(-(a1 * a1 + b1 * b1) * inv2)
+               + Math.exp(-(a2 * a2 + b2 * b2) * inv2)
+               + 0.7 * Math.exp(-(a3 * a3 + b3 * b3) * inv2);
+        it += 0.06 * (0.5 + 0.5 * Math.sin(d.x * 0.03 + d.y * 0.03 + t * 0.0012));
+        if (it > 1) it = 1;
+        it = it * it * (3 - 2 * it);
+        const r = 0.45 + it * 1.7;
+        const a = 0.05 + it * 0.38;
+        ctx.beginPath();
+        ctx.arc(d.x, d.y, r, 0, 6.2832);
+        ctx.fillStyle = `rgba(13, 148, 136, ${a.toFixed(3)})`;
+        ctx.fill();
       }
 
-      t += 0.007;
-      animId = requestAnimationFrame(draw);
+      if (!reduced) animId = requestAnimationFrame(frame);
     };
 
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-      t = 2;
-      draw();
-      cancelAnimationFrame(animId!);
+    if (reduced) {
+      frame(t0 + 1500);
     } else {
-      draw();
+      animId = requestAnimationFrame(frame);
     }
 
     return () => {
