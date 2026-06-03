@@ -1,41 +1,49 @@
-import { AlertTriangle, Clock, Wrench } from "lucide-react";
-import type { Order } from "@/data/mockOrders";
+import { PhoneCall, Clock, MessageCircle, CheckCircle2 } from "lucide-react";
+import type { Lead } from "@/data/mockOrders";
 
 interface KpiCardsProps {
-  orders: Order[];
+  leads: Lead[];
 }
 
-const cards = (orders: Order[]) => [
-  {
-    label: "Notfälle offen",
-    value: orders.filter((o) => o.priority === "hoch" && o.status !== "done").length,
-    icon: AlertTriangle,
-    iconClass: "text-rose-500",
-    iconBg: "bg-rose-50 dark:bg-rose-950/40",
-    valueClass: (v: number) => v > 0 ? "text-rose-600 dark:text-rose-400" : "text-foreground",
-  },
-  {
-    label: "Offen",
-    value: orders.filter((o) => o.status === "open").length,
-    icon: Clock,
-    iconClass: "text-amber-500",
-    iconBg: "bg-amber-50 dark:bg-amber-950/40",
-    valueClass: () => "text-foreground",
-  },
-  {
-    label: "In Bearbeitung",
-    value: orders.filter((o) => o.status === "in_progress").length,
-    icon: Wrench,
-    iconClass: "text-blue-500",
-    iconBg: "bg-blue-50 dark:bg-blue-950/40",
-    valueClass: () => "text-foreground",
-  },
-];
+export function KpiCards({ leads }: KpiCardsProps) {
+  const cards = [
+    {
+      label: "Neue Anfragen",
+      value: leads.filter((l) => l.status === "Neu").length,
+      icon: PhoneCall,
+      iconClass: "text-primary",
+      iconBg: "bg-primary/10",
+      valueClass: () => "text-foreground",
+    },
+    {
+      label: "In Bearbeitung",
+      value: leads.filter((l) => l.status === "In Bearbeitung").length,
+      icon: Clock,
+      iconClass: "text-amber-500",
+      iconBg: "bg-amber-50",
+      valueClass: () => "text-foreground",
+    },
+    {
+      label: "Kontaktiert",
+      value: leads.filter((l) => l.status === "Kontaktiert").length,
+      icon: MessageCircle,
+      iconClass: "text-blue-500",
+      iconBg: "bg-blue-50",
+      valueClass: () => "text-foreground",
+    },
+    {
+      label: "Abgeschlossen",
+      value: leads.filter((l) => l.status === "Abgeschlossen").length,
+      icon: CheckCircle2,
+      iconClass: "text-emerald-500",
+      iconBg: "bg-emerald-50",
+      valueClass: () => "text-foreground",
+    },
+  ];
 
-export function KpiCards({ orders }: KpiCardsProps) {
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-      {cards(orders).map((card) => (
+    <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+      {cards.map((card) => (
         <div
           key={card.label}
           className="rounded-xl border bg-card px-4 py-3 shadow-sm hover:shadow-md transition-shadow duration-200 flex items-center gap-3"

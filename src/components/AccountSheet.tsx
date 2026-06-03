@@ -235,7 +235,7 @@ export function AccountSheet({ open, onOpenChange }: AccountSheetProps) {
         <div className="px-6 py-4 border-t">
           <Button
             variant="ghost"
-            className="w-full justify-start text-sm text-muted-foreground hover:text-rose-500 hover:bg-rose-500/10"
+            className="w-full justify-start text-sm text-muted-foreground hover:text-foreground hover:bg-muted"
             onClick={signOut}
           >
             <LogOut className="h-4 w-4 mr-2" />

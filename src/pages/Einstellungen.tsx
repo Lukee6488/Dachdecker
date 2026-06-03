@@ -1,4 +1,4 @@
-import { useState } from "react";
+﻿import { useState } from "react";
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -30,10 +30,10 @@ import {
   Building2, Bell, Palette, Shield, Database, Info,
   Save, Upload, Trash2, Download, Mail, Phone,
   MapPin, Globe, Clock, Sun, Moon, Monitor,
-  Lock, Key, FileText, AlertTriangle, CheckCircle2, Zap,
+  Lock, Key, FileText, AlertTriangle, CheckCircle2, HardHat,
 } from "lucide-react";
 import { toast } from "sonner";
-import { useOrders } from "@/context/OrdersContext";
+import { useLeads } from "@/context/LeadsContext";
 import { useAuth } from "@/context/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -46,28 +46,24 @@ const DEFAULT_SCHEDULE: DaySchedule[] = DAYS.map((_, i) => ({
 }));
 
 const Einstellungen = () => {
-  const { orders } = useOrders();
+  const { leads } = useLeads();
   const { user, signOut } = useAuth();
 
   const handleExportCSV = () => {
-    const headers = ["ID", "Kunde", "Adresse", "Telefon", "Kategorie", "Priorität", "Status", "Eingang", "Termin", "Zugewiesen an", "Beschreibung", "Notizen"];
-    const rows = orders.map((o) => [
-      o.id, o.customerName, o.address, o.phone, o.category, o.priority,
-      o.status, o.receivedAt, o.scheduledAt ?? "", o.assignedTo ?? "",
-      o.description, o.notes,
-    ].map((v) => `"${String(v).replace(/"/g, '""')}"`).join(";"));
+    const headers = ["ID", "Name", "Kontakt", "Kategorie", "Quelle", "Status", "Eingang", "Nachricht"];
+    const rows = leads.map((l) => [l.id, l.name, l.kontakt ?? "", l.kategorie, l.quelle ?? "", l.status, l.datum, l.nachricht ?? ""].map((v) => `"${String(v).replace(/"/g, '""')}"` ).join(";"));
     const csv = [headers.join(";"), ...rows].join("\n");
     const blob = new Blob(["\uFEFF" + csv], { type: "text/csv;charset=utf-8;" });
     const url = URL.createObjectURL(blob);
-    const a = document.createElement("a"); a.href = url; a.download = "auftraege.csv"; a.click();
+    const a = document.createElement("a"); a.href = url; a.download = "leads.csv"; a.click();
     URL.revokeObjectURL(url);
     toast.success("CSV exportiert");
   };
 
   const handleExportJSON = () => {
-    const blob = new Blob([JSON.stringify(orders, null, 2)], { type: "application/json" });
+    const blob = new Blob([JSON.stringify(leads, null, 2)], { type: "application/json" });
     const url = URL.createObjectURL(blob);
-    const a = document.createElement("a"); a.href = url; a.download = "auftraege.json"; a.click();
+    const a = document.createElement("a"); a.href = url; a.download = "leads.json"; a.click();
     URL.revokeObjectURL(url);
     toast.success("JSON exportiert");
   };
@@ -102,9 +98,9 @@ const Einstellungen = () => {
   };
 
   const handleDeleteAllOrders = async () => {
-    const { error } = await supabase.from("orders").delete().lte("received_at", new Date().toISOString());
+    const { error } = await supabase.from("leads").delete().lte("datum", new Date().toISOString());
     if (error) { toast.error("Fehler beim Löschen"); return; }
-    toast.success("Alle Aufträge gelöscht");
+    toast.success("Alle Leads gelöscht");
     setConfirmDeleteOrders(false);
   };
 
@@ -121,13 +117,13 @@ const Einstellungen = () => {
     return [value, set];
   }
 
-  const [companyName, setCompanyName] = usePersisted("settings.companyName", "Elektro Heikes");
-  const [companyEmail, setCompanyEmail] = usePersisted("settings.companyEmail", "info@elektro-heikes.de");
+  const [companyName, setCompanyName] = usePersisted("settings.companyName", "Güldenarm GmbH & Co. KG");
+  const [companyEmail, setCompanyEmail] = usePersisted("settings.companyEmail", "info@gueldenarm.de");
   const [companyPhone, setCompanyPhone] = usePersisted("settings.companyPhone", "");
   const [companyAddress, setCompanyAddress] = usePersisted("settings.companyAddress", "");
   const [companyWebsite, setCompanyWebsite] = usePersisted("settings.companyWebsite", "");
   const [companyDescription, setCompanyDescription] = usePersisted("settings.companyDescription",
-    "Elektriker-Dispositionssoftware für effiziente Einsatzplanung und Auftragsverwaltung."
+    "Lead-Management für Dachdeckerarbeiten und Anfragenbearbeitung."
   );
   const [taxId, setTaxId] = usePersisted("settings.taxId", "");
 
@@ -632,7 +628,7 @@ const Einstellungen = () => {
                   <p className="text-xs text-muted-foreground">Diese Aktionen können nicht rückgängig gemacht werden.</p>
                   <div className="flex gap-2">
                     <Button variant="outline" size="sm" className="text-xs h-7 text-destructive border-destructive/25 hover:bg-destructive/10" onClick={() => setConfirmDeleteOrders(true)}>
-                      Alle Aufträge löschen
+                      Alle Leads löschen
                     </Button>
                     <Button variant="outline" size="sm" className="text-xs h-7 text-destructive border-destructive/25 hover:bg-destructive/10" onClick={() => setConfirmResetAccount(true)}>
                       Account zurücksetzen
@@ -686,7 +682,7 @@ const Einstellungen = () => {
               <CardHeader className="pb-4">
                 <CardTitle className="text-sm font-semibold flex items-center gap-2">
                   <Zap className="h-4 w-4 text-primary" />
-                  ElektroDisp
+                  DachDisp
                 </CardTitle>
                 <CardDescription className="text-xs">Informationen zur Anwendung</CardDescription>
               </CardHeader>
@@ -696,7 +692,7 @@ const Einstellungen = () => {
                     { label: "Version", value: "1.0.0" },
                     { label: "Build", value: "2026.03.25-stable" },
                     { label: "Lizenz", value: "Business" },
-                    { label: "Support", value: "support@elektrodisp.de" },
+                    { label: "Support", value: "support@DachDisp.de" },
                   ].map((row) => (
                     <>
                       <span key={row.label + "l"} className="text-muted-foreground text-xs">{row.label}</span>
@@ -747,13 +743,13 @@ const Einstellungen = () => {
           </TabsContent>
         </Tabs>
       </div>
-      {/* Alle Aufträge löschen */}
+      {/* Alle Leads löschen */}
       <AlertDialog open={confirmDeleteOrders} onOpenChange={setConfirmDeleteOrders}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Alle Aufträge löschen?</AlertDialogTitle>
+            <AlertDialogTitle>Alle Leads löschen?</AlertDialogTitle>
             <AlertDialogDescription>
-              Alle {orders.length} Aufträge werden dauerhaft aus der Datenbank gelöscht. Diese Aktion kann nicht rückgängig gemacht werden.
+              Alle {leads.length} Leads werden dauerhaft aus der Datenbank gelöscht. Diese Aktion kann nicht rückgängig gemacht werden.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -787,3 +783,4 @@ const Einstellungen = () => {
 };
 
 export default Einstellungen;
+

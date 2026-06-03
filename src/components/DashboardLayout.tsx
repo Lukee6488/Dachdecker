@@ -5,16 +5,11 @@ import { useLocation } from "react-router-dom";
 import { Separator } from "@/components/ui/separator";
 
 const pageTitles: Record<string, { title: string; description: string }> = {
-  "/": { title: "Dashboard", description: "Übersicht" },
-  "/kalender": { title: "Kalender", description: "Terminplanung" },
-  "/projektleiter": { title: "Projektleiter", description: "Teamverwaltung" },
-  "/analytics": { title: "Statistiken", description: "Auswertungen" },
-  "/historie": { title: "Historie", description: "Archiv" },
-  "/einstellungen": { title: "Einstellungen", description: "System" },
-  "/pl": { title: "Dashboard", description: "Meine Aufträge" },
-  "/pl/kalender": { title: "Kalender", description: "Termine" },
-  "/pl/historie": { title: "Historie", description: "Archiv" },
-  "/pl/statistiken": { title: "Statistiken", description: "Auswertungen" },
+  "/":             { title: "Dashboard",     description: "Güldenarm GmbH & Co. KG" },
+  "/termine":      { title: "Termine",       description: "Wochenkalender" },
+  "/analytics":    { title: "Statistiken",   description: "Auswertungen" },
+  "/historie":     { title: "Archiv",        description: "Abgeschlossene Anfragen" },
+  "/einstellungen":{ title: "Einstellungen", description: "System" },
 };
 
 interface DashboardLayoutProps {
@@ -30,7 +25,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
       <div className="min-h-screen flex w-full bg-background">
         <AppSidebar />
         <div className="flex-1 flex flex-col min-w-0">
-          <header className="h-11 flex items-center border-b bg-card/60 backdrop-blur-sm px-4 shrink-0 gap-3 sticky top-0 z-10">
+          <header className="h-11 flex items-center border-b border-border/70 bg-card px-4 shrink-0 gap-3 sticky top-0 z-10">
             <SidebarTrigger className="h-7 w-7 text-muted-foreground hover:text-foreground hover:bg-muted rounded-md transition-colors" />
             <Separator orientation="vertical" className="h-4" />
             {page && (

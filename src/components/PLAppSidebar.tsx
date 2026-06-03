@@ -85,7 +85,7 @@ export function PLAppSidebar() {
             </div>
             <button
               onClick={signOut}
-              className="h-6 w-6 flex items-center justify-center rounded text-sidebar-foreground/40 hover:text-rose-400 hover:bg-rose-500/10 transition-colors shrink-0"
+              className="h-6 w-6 flex items-center justify-center rounded text-sidebar-foreground/40 hover:text-sidebar-accent-foreground hover:bg-sidebar-accent/70 transition-colors shrink-0"
               title="Abmelden"
             >
               <LogOut className="h-3.5 w-3.5" />
@@ -98,7 +98,7 @@ export function PLAppSidebar() {
               <SidebarMenuButton asChild>
                 <button
                   onClick={signOut}
-                  className="flex items-center gap-2.5 rounded-md px-2.5 py-2 w-full text-[13px] font-medium text-sidebar-foreground/40 hover:text-rose-400 hover:bg-rose-500/10 transition-colors"
+                  className="flex items-center gap-2.5 rounded-md px-2.5 py-2 w-full text-[13px] font-medium text-sidebar-foreground/40 hover:text-sidebar-accent-foreground hover:bg-sidebar-accent/70 transition-colors"
                   title="Abmelden"
                 >
                   <LogOut className="h-4 w-4 shrink-0" />

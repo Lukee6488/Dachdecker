@@ -1,0 +1,22 @@
+[Unit]
+Description=Güldenarm Email Agent (Trigger.dev Worker)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=lukas
+WorkingDirectory=/home/lukas/gueldenarm-email-agent
+# Use the production worker command
+ExecStart=/usr/bin/npx trigger.dev@latest dev --self-hosted
+Restart=always
+RestartSec=10
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=gueldenarm-email-agent
+
+# Load secrets from env file
+EnvironmentFile=/home/lukas/gueldenarm-email-agent/.env
+
+[Install]
+WantedBy=multi-user.target

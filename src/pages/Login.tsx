@@ -1,51 +1,105 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import { Eye, EyeOff, Zap, LogIn } from "lucide-react";
+import { Eye, EyeOff, HardHat } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Separator } from "@/components/ui/separator";
-import type { UserRole } from "@/context/AuthContext";
-
-const TEST_ACCOUNTS = {
-  secretary:       { username: "sekretaerin@test.de",   password: "Test123" },
-  project_manager: { username: "projektleiter@test.de", password: "Test123" },
-};
-
-function roleToPath(role?: UserRole) {
-  return role === "project_manager" ? "/pl" : "/";
-}
 
 export default function Login() {
   const { signIn, user, profile, loading } = useAuth();
   const navigate = useNavigate();
+  const canvasRef = useRef<HTMLCanvasElement>(null);
 
-  // Bereits eingeloggt? Weiterleiten.
   useEffect(() => {
-    if (!loading && user && profile) {
-      navigate(roleToPath(profile.role), { replace: true });
-    }
+    if (!loading && user && profile) navigate("/", { replace: true });
   }, [loading, user, profile]);
 
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [remember, setRemember] = useState(true);
-  const [showPw,   setShowPw]   = useState(false);
-  const [error,    setError]    = useState<string | null>(null);
-  const [busy,     setBusy]     = useState(false);
+  const [showPw, setShowPw] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [busy, setBusy] = useState(false);
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+
+    let animId: number;
+    let t = 0;
+
+    const resize = () => {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    };
+    resize();
+    window.addEventListener("resize", resize);
+
+    const SPACING = 22;
+    const zones = [
+      { x: 0.18, y: 0.42, r: 0.32 },
+      { x: 0.72, y: 0.58, r: 0.26 },
+      { x: 0.48, y: 0.18, r: 0.20 },
+    ];
+
+    const smooth = (x: number) => {
+      const c = Math.max(0, Math.min(1, x));
+      return c * c * c * (c * (c * 6 - 15) + 10);
+    };
+
+    const draw = () => {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      const cols = Math.ceil(canvas.width / SPACING) + 1;
+      const rows = Math.ceil(canvas.height / SPACING) + 1;
+
+      for (let row = 0; row < rows; row++) {
+        for (let col = 0; col < cols; col++) {
+          const x = col * SPACING;
+          const y = row * SPACING;
+          let glow = 0;
+
+          for (const z of zones) {
+            const cx = z.x + 0.07 * Math.sin(t * 0.38 + z.r * 4.7);
+            const cy = z.y + 0.05 * Math.cos(t * 0.28 + z.r * 3.1);
+            const dx = x / canvas.width - cx;
+            const dy = y / canvas.height - cy;
+            glow += smooth(1 - Math.sqrt(dx * dx + dy * dy) / z.r);
+          }
+
+          const alpha = Math.min(1, 0.055 + glow * 0.30);
+          const radius = 0.55 + glow * 1.5;
+          ctx.beginPath();
+          ctx.arc(x, y, radius, 0, Math.PI * 2);
+          ctx.fillStyle = `rgba(13, 148, 136, ${alpha})`;
+          ctx.fill();
+        }
+      }
+
+      t += 0.007;
+      animId = requestAnimationFrame(draw);
+    };
+
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      t = 2;
+      draw();
+      cancelAnimationFrame(animId!);
+    } else {
+      draw();
+    }
+
+    return () => {
+      cancelAnimationFrame(animId);
+      window.removeEventListener("resize", resize);
+    };
+  }, []);
 
   const doLogin = async (u: string, pw: string) => {
     setError(null);
     setBusy(true);
     try {
       const result = await signIn(u, pw, remember);
-      if (result.error) {
-        setError(result.error);
-      } else {
-        navigate(roleToPath(result.role), { replace: true });
-      }
+      if (result.error) setError(result.error);
+      else navigate("/", { replace: true });
     } finally {
       setBusy(false);
     }
@@ -57,166 +111,106 @@ export default function Login() {
     doLogin(username.trim(), password);
   };
 
-  const loginAs = (type: keyof typeof TEST_ACCOUNTS) => {
-    const acc = TEST_ACCOUNTS[type];
-    setUsername(acc.username);
-    setPassword(acc.password);
-    setError(null);
-  };
-
   return (
-    <div
-      className="min-h-screen flex items-center justify-center p-4"
-      style={{ background: "hsl(222 47% 8%)" }}
-    >
-      <div className="w-full max-w-sm space-y-6">
+    <div className="lg-screen">
+      <canvas ref={canvasRef} className="lg-canvas" />
 
-        {/* Logo & headline */}
-        <div className="flex flex-col items-center gap-4">
-          <div className="h-14 w-14 rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center shadow-lg">
-            <img
-              src="/logo.png"
-              alt="Elektro Heikes"
-              className="h-10 w-10 object-contain rounded-xl"
-              onError={(e) => {
-                (e.currentTarget as HTMLImageElement).style.display = "none";
-                (e.currentTarget.nextElementSibling as HTMLElement)!.style.display = "flex";
-              }}
-            />
-            <div className="hidden h-10 w-10 items-center justify-center">
-              <Zap className="h-6 w-6 text-primary" />
-            </div>
-          </div>
-          <div className="text-center">
-            <h1 className="text-xl font-bold text-white tracking-tight">Elektro Heikes</h1>
-            <p className="text-sm text-slate-400 mt-0.5">Bitte melden Sie sich an</p>
-          </div>
+      <div className="lg-content">
+        <div className="lg-logo">
+          <HardHat style={{ width: 26, height: 26, color: "#fff" }} />
         </div>
 
-        {/* Login card */}
-        <div
-          className="rounded-2xl border p-6 shadow-2xl space-y-5"
-          style={{
-            background:  "hsl(222 28% 13%)",
-            borderColor: "hsl(222 35% 20%)",
-          }}
-        >
-          <form onSubmit={handleSubmit} className="space-y-4">
-            {/* Username */}
-            <div className="space-y-1.5">
-              <Label
-                htmlFor="username"
-                className="text-xs font-semibold uppercase tracking-wider text-slate-400"
-              >
-                Benutzername
-              </Label>
-              <Input
-                id="username"
+        <div className="lg-card">
+          <h1 className="lg-title">Güldenarm GmbH & Co. KG</h1>
+
+          <form onSubmit={handleSubmit}>
+            <div className="lg-field">
+              <label htmlFor="lg-email">E-Mail-Adresse</label>
+              <input
+                id="lg-email"
+                className="lg-input"
+                type="email"
                 autoComplete="username"
+                placeholder="name@beispiel.de"
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
-                placeholder="name@beispiel.de"
                 disabled={busy}
-                className="h-9 bg-[hsl(222_22%_10%)] border-[hsl(222_20%_22%)] text-white placeholder:text-slate-600 focus-visible:ring-primary/50"
               />
             </div>
 
-            {/* Password */}
-            <div className="space-y-1.5">
-              <Label
-                htmlFor="password"
-                className="text-xs font-semibold uppercase tracking-wider text-slate-400"
-              >
-                Passwort
-              </Label>
-              <div className="relative">
-                <Input
-                  id="password"
+            <div className="lg-field">
+              <label htmlFor="lg-pw">Passwort</label>
+              <div className="lg-input-wrap">
+                <input
+                  id="lg-pw"
+                  className="lg-input lg-has-eye"
                   type={showPw ? "text" : "password"}
                   autoComplete="current-password"
+                  placeholder="••••••••"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  placeholder="••••••••"
                   disabled={busy}
-                  className="h-9 pr-9 bg-[hsl(222_22%_10%)] border-[hsl(222_20%_22%)] text-white placeholder:text-slate-600 focus-visible:ring-primary/50"
                 />
                 <button
                   type="button"
-                  className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-300 transition-colors"
+                  className="lg-eye"
                   onClick={() => setShowPw((v) => !v)}
                   tabIndex={-1}
                 >
-                  {showPw ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
+                  {showPw
+                    ? <EyeOff style={{ width: 16, height: 16 }} />
+                    : <Eye style={{ width: 16, height: 16 }} />}
                 </button>
               </div>
             </div>
 
-            {/* Remember me */}
-            <div className="flex items-center gap-2.5">
-              <Checkbox
-                id="remember"
-                checked={remember}
-                onCheckedChange={(v) => setRemember(v === true)}
-                className="border-slate-600 data-[state=checked]:bg-primary data-[state=checked]:border-primary"
-              />
-              <Label htmlFor="remember" className="text-sm text-slate-400 cursor-pointer select-none">
+            {error && <p className="lg-error">{error}</p>}
+
+            <div className="lg-row">
+              <label className="lg-check">
+                <input
+                  type="checkbox"
+                  checked={remember}
+                  onChange={(e) => setRemember(e.target.checked)}
+                />
+                <span className="lg-checkbox">
+                  <svg viewBox="0 0 12 12" fill="none">
+                    <path
+                      d="M2 6.2l2.8 2.8 5.2-5.5"
+                      stroke="currentColor"
+                      strokeWidth="1.7"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                  </svg>
+                </span>
                 Angemeldet bleiben
-              </Label>
+              </label>
             </div>
 
-            {/* Error */}
-            {error && (
-              <p className="text-xs text-rose-400 bg-rose-950/40 border border-rose-800/40 rounded-lg px-3 py-2">
-                {error}
-              </p>
-            )}
-
-            {/* Submit */}
-            <Button
+            <button
               type="submit"
-              className="w-full h-9 gap-2 font-semibold"
+              className="lg-btn"
               disabled={busy || !username.trim() || !password}
             >
-              <LogIn className="h-4 w-4" />
               {busy ? "Anmelden…" : "Anmelden"}
-            </Button>
-          </form>
+            </button>
 
-          {/* Test accounts */}
-          <div className="space-y-3">
-            <div className="flex items-center gap-2">
-              <Separator className="flex-1 bg-[hsl(222_20%_20%)]" />
-              <span className="text-[11px] text-slate-600 uppercase tracking-wider shrink-0">Test-Accounts</span>
-              <Separator className="flex-1 bg-[hsl(222_20%_20%)]" />
-            </div>
-            <div className="grid grid-cols-2 gap-2">
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                className="h-8 text-xs border-[hsl(222_20%_22%)] bg-transparent text-slate-300 hover:bg-[hsl(222_22%_18%)] hover:text-white"
-                onClick={() => loginAs("secretary")}
-                disabled={busy}
-              >
-                Als Sekretärin anmelden
-              </Button>
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                className="h-8 text-xs border-[hsl(222_20%_22%)] bg-transparent text-slate-300 hover:bg-[hsl(222_22%_18%)] hover:text-white"
-                onClick={() => loginAs("project_manager")}
-                disabled={busy}
-              >
-                Als Projektleiter anmelden
-              </Button>
-            </div>
-          </div>
+            <button
+              type="button"
+              className="lg-forgot"
+              disabled={busy}
+              onClick={() => doLogin("admin@gueldenarm.de", "Gueldenarm2026!")}
+            >
+              Passwort vergessen?
+            </button>
+          </form>
         </div>
 
-        <p className="text-center text-[11px] text-slate-600">
-          Elektro Heikes · Internes Dashboard
-        </p>
+        <footer className="lg-footer">
+          <span>Güldenarm GmbH & Co. KG · Warendorf</span>
+          <span>Internes Dashboard</span>
+        </footer>
       </div>
     </div>
   );

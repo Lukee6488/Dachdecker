@@ -1,13 +1,13 @@
 import { useMemo } from "react";
-import { Bell, AlertTriangle, Calendar, Clock, CheckCircle2 } from "lucide-react";
+import { Bell, PhoneCall, Clock, CheckCircle2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { useOrders } from "@/context/OrdersContext";
-import { parseISO, isBefore, startOfDay } from "date-fns";
+import { useLeads } from "@/context/LeadsContext";
+import { parseISO, differenceInDays } from "date-fns";
 import { cn } from "@/lib/utils";
 
 interface Notification {
@@ -20,50 +20,36 @@ interface Notification {
 }
 
 export function NotificationsPanel() {
-  const { orders } = useOrders();
+  const { leads } = useLeads();
 
   const notifications = useMemo(() => {
     const items: Notification[] = [];
-    const today = startOfDay(new Date());
+    const now = new Date();
 
-    const urgentUnassigned = orders.filter(
-      (o) => o.priority === "hoch" && o.status !== "done" && !o.assignedTo
-    );
-    if (urgentUnassigned.length > 0) {
+    const newLeads = leads.filter((l) => l.status === "Neu");
+    if (newLeads.length > 0) {
       items.push({
-        id: "urgent-unassigned",
-        icon: AlertTriangle,
-        iconClass: "text-rose-500",
-        title: `${urgentUnassigned.length} dringende${urgentUnassigned.length === 1 ? "r" : ""} Auftrag${urgentUnassigned.length === 1 ? "" : "aufträge"} unzugewiesen`,
-        description: urgentUnassigned.map((o) => o.customerName).slice(0, 2).join(", ") + (urgentUnassigned.length > 2 ? ` +${urgentUnassigned.length - 2}` : ""),
+        id: "new-leads",
+        icon: PhoneCall,
+        iconClass: "text-primary",
+        title: `${newLeads.length} neue${newLeads.length === 1 ? "r" : ""} Lead${newLeads.length === 1 ? "" : "s"} unbearbeitet`,
+        description: newLeads.map((l) => l.name).slice(0, 3).join(", ") + (newLeads.length > 3 ? ` +${newLeads.length - 3}` : ""),
         severity: "high",
       });
     }
 
-    const overdue = orders.filter((o) => {
-      if (o.status === "done" || !o.scheduledAt) return false;
-      try { return isBefore(parseISO(o.scheduledAt), today); } catch { return false; }
+    const stale = leads.filter((l) => {
+      if (l.status === "Abgeschlossen") return false;
+      try { return differenceInDays(now, parseISO(l.datum)) > 7; } catch { return false; }
     });
-    if (overdue.length > 0) {
+    if (stale.length > 0) {
       items.push({
-        id: "overdue",
+        id: "stale-leads",
         icon: Clock,
         iconClass: "text-amber-500",
-        title: `${overdue.length} überfällige${overdue.length === 1 ? "r" : ""} Auftrag${overdue.length === 1 ? "" : "aufträge"}`,
-        description: overdue.map((o) => o.customerName).slice(0, 2).join(", ") + (overdue.length > 2 ? ` +${overdue.length - 2}` : ""),
+        title: `${stale.length} Lead${stale.length === 1 ? "" : "s"} älter als 7 Tage`,
+        description: stale.map((l) => l.name).slice(0, 2).join(", ") + (stale.length > 2 ? ` +${stale.length - 2}` : ""),
         severity: "medium",
-      });
-    }
-
-    const noDate = orders.filter((o) => !o.scheduledAt && o.status !== "done");
-    if (noDate.length > 0) {
-      items.push({
-        id: "no-date",
-        icon: Calendar,
-        iconClass: "text-blue-500",
-        title: `${noDate.length} Auftrag${noDate.length === 1 ? "" : "aufträge"} ohne Termin`,
-        description: "Noch kein Termin vergeben",
-        severity: "info",
       });
     }
 
@@ -79,16 +65,16 @@ export function NotificationsPanel() {
     }
 
     return items;
-  }, [orders]);
+  }, [leads]);
 
-  const highCount = notifications.filter((n) => n.severity === "high").length;
+  const highCount   = notifications.filter((n) => n.severity === "high").length;
   const mediumCount = notifications.filter((n) => n.severity === "medium").length;
-  const badgeCount = highCount + mediumCount;
+  const badgeCount  = highCount + mediumCount;
 
   const severityBg: Record<string, string> = {
-    high: "bg-rose-50 dark:bg-rose-950/30",
+    high:   "bg-rose-50 dark:bg-rose-950/30",
     medium: "bg-amber-50 dark:bg-amber-950/30",
-    info: "bg-muted/40",
+    info:   "bg-muted/40",
   };
 
   return (
