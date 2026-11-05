@@ -1,1 +1,0 @@
-ALTER TABLE public.orders ADD COLUMN kategorie text NOT NULL DEFAULT 'Staerkstrom';
